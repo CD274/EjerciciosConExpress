@@ -1,0 +1,22 @@
+{
+  "name": "ejercicioexpress",
+  "version": "1.0.0",
+  "description": "Ejercicio con libreria ecpress",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CD274/EjerciciosConExpress.git"
+  },
+  "author": "CDGV",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CD274/EjerciciosConExpress/issues"
+  },
+  "homepage": "https://github.com/CD274/EjerciciosConExpress#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
