@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-var lista = [{
+const lista = [{
     id: '1',
     nombre: 'Carlos'
 }, {
@@ -71,7 +71,56 @@ app.get('/pentagono/:l', (req, resp) => {
     resp.send(`Pentágono Regular: Área = ${area}, Perímetro = ${perimetro}`);
 });
 
-app.listen(3000,()=>{
-    console.log('Servidor corriendo en el puerto 3000');  //Notificación del inicio del server
+// 4. Tarea en clase De trinomio cuadrado perfecto
+// Función para verificar si un trinomio cuadrado es perfecto
+function esTrinomioCP(a, b, c) {
+    const discriminante = b ** 2;
+    const producto = 4 * a * c;
+    return discriminante === producto;
+}
+
+// Función para convertir el trinomio en un binomio
+function converBi(a, b, c) {
+    const m = Math.sqrt(a); // Coeficiente de x
+    const n = Math.sqrt(c); // Constante
+    const signo = b > 0 ? '+' : '-'; // Determinar el signo en el binomio
+
+    return {
+        binomio: `(${m}x ${signo} ${Math.abs(n)})²`,
+        m: m,
+        n: signo === '+' ? n : -n // Ajustar el signo para cálculos posteriores
+    };
+}
+
+// Función para resolver el binomio al cuadrado y encontrar x
+function resolverBinomio(m, n) {
+    // Igualar (mx + n)^2 = 0 => mx + n = 0
+    const x = -n / m;
+    return x;
+}
+
+app.get('/trinomio/:a/:b/:c', (req, resp) => {
+    const a = parseFloat(req.params.a);
+    const b = parseFloat(req.params.b);
+    const c = parseFloat(req.params.c);
+
+    // Validar si es un trinomio cuadrado perfecto
+    if (esTrinomioCP(a, b, c)) {
+        const { binomio, m, n } = converBi(a, b, c);
+        const x = resolverBinomio(m, n);
+
+        resp.send({
+            mensaje: `El trinomio ${a}x² + ${b}x + ${c} es un trinomio cuadrado perfecto.`,
+            binomio: binomio,
+            solucion: `x = ${x}`
+        });
+    } else {
+        resp.send({
+            mensaje: `El trinomio ${a}x² + ${b}x + ${c} NO es un trinomio cuadrado perfecto.`
+        });
+    }
 });
 
+app.listen(3000, () => {
+    console.log('Servidor corriendo en el puerto 3000');  // Notificación del inicio del server
+});
