@@ -73,29 +73,24 @@ app.get('/pentagono/:l', (req, resp) => {
 
 // 4. Tarea en clase De trinomio cuadrado perfecto
 // Verifica si es un trinomio cuadrado perfecto
-function esTrinomioCP(a, b, c) {
-    const discriminante = b ** 2;
-    const producto = 4 * a * c;
-    return discriminante === producto;
+// Comprueba si el trinomio es un cuadrado perfecto
+function esTrinomioCuadradoPerfecto(a, b, c) {
+    // Verificar si cumple con la forma a² ± 2ab + b²
+    const terminoMedio = Math.sqrt(a) * Math.sqrt(c) * 2;
+    return b === terminoMedio || b === -terminoMedio;
 }
 
 // Convierte el trinomio en un binomio cuadrado perfecto
-function converBi(a, b, c) {
-    const m = Math.sqrt(Math.abs(a));
-    const n = Math.sqrt(Math.abs(c));
+function convertirABinomioCuadradoPerfecto(a, b, c) {
+    const m = Math.sqrt(a); // Coeficiente de la raíz cuadrada de a
+    const n = Math.sqrt(c); // Coeficiente de la raíz cuadrada de c
     const signo = b > 0 ? '+' : '-';
 
     return {
-        binomio: `(${m}x ${signo} ${Math.abs(n)})²`,
+        binomio: `(${m}x ${signo} ${n})²`,
         m: m,
         n: signo === '+' ? n : -n
     };
-}
-
-// Resuelve el binomio cuadrado perfecto
-function resolverBinomio(m, n) {
-    const x = -n / m;
-    return x;
 }
 
 // Formatea el trinomio eliminando redundancias de signos
@@ -105,7 +100,7 @@ function formatearTrinomio(a, b, c) {
     return `${a}x² ${signoB}x ${signoC}`;
 }
 
-// Genera las combinaciones de signos posibles
+// Genera las combinaciones de signos posibles para evaluar
 function generarCombinaciones(a, b, c) {
     const combinaciones = [
         { signoA: 1, signoB: 1, signoC: 1 }, // +++
@@ -121,7 +116,7 @@ function generarCombinaciones(a, b, c) {
     }));
 }
 
-// Ruta GET
+// Ruta GET para resolver el problema de trinomios cuadrados perfectos
 app.get('/trinomios/:a/:b/:c', (req, resp) => {
     const a = parseFloat(req.params.a);
     const b = parseFloat(req.params.b);
@@ -133,15 +128,14 @@ app.get('/trinomios/:a/:b/:c', (req, resp) => {
     combinaciones.forEach(({ a, b, c }) => {
         const trinomio = formatearTrinomio(a, b, c);
 
-        if (esTrinomioCP(a, b, c)) {
-            const { binomio, m, n } = converBi(a, b, c);
-            const x = resolverBinomio(m, n);
+        if (esTrinomioCuadradoPerfecto(a, b, c)) {
+            const { binomio, m, n } = convertirABinomioCuadradoPerfecto(a, b, c);
 
             resultados.push({
                 trinomio: trinomio,
                 mensaje: `Es un trinomio cuadrado perfecto.`,
                 binomio: binomio,
-                solucion: `x = ${x}`
+                factorizacion: `${a}x² ${b}x ${c} = ${binomio}`
             });
         } else {
             resultados.push({
