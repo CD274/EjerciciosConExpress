@@ -72,54 +72,88 @@ app.get('/pentagono/:l', (req, resp) => {
 });
 
 // 4. Tarea en clase De trinomio cuadrado perfecto
-// Función para verificar si un trinomio cuadrado es perfecto
+// Verifica si es un trinomio cuadrado perfecto
 function esTrinomioCP(a, b, c) {
     const discriminante = b ** 2;
     const producto = 4 * a * c;
     return discriminante === producto;
 }
 
-// Función para convertir el trinomio en un binomio
+// Convierte el trinomio en un binomio cuadrado perfecto
 function converBi(a, b, c) {
-    const m = Math.sqrt(a); // Coeficiente de x
-    const n = Math.sqrt(c); // Constante
-    const signo = b > 0 ? '+' : '-'; // Determinar el signo en el binomio
+    const m = Math.sqrt(Math.abs(a));
+    const n = Math.sqrt(Math.abs(c));
+    const signo = b > 0 ? '+' : '-';
 
     return {
         binomio: `(${m}x ${signo} ${Math.abs(n)})²`,
         m: m,
-        n: signo === '+' ? n : -n // Ajustar el signo para cálculos posteriores
+        n: signo === '+' ? n : -n
     };
 }
 
-// Función para resolver el binomio al cuadrado y encontrar x
+// Resuelve el binomio cuadrado perfecto
 function resolverBinomio(m, n) {
-    // Igualar (mx + n)^2 = 0 => mx + n = 0
     const x = -n / m;
     return x;
 }
 
-app.get('/trinomio/:a/:b/:c', (req, resp) => {
+// Formatea el trinomio eliminando redundancias de signos
+function formatearTrinomio(a, b, c) {
+    const signoB = b >= 0 ? `+${b}` : `${b}`;
+    const signoC = c >= 0 ? `+${c}` : `${c}`;
+    return `${a}x² ${signoB}x ${signoC}`;
+}
+
+// Genera las combinaciones de signos posibles
+function generarCombinaciones(a, b, c) {
+    const combinaciones = [
+        { signoA: 1, signoB: 1, signoC: 1 }, // +++
+        { signoA: 1, signoB: -1, signoC: 1 }, // +-+
+        { signoA: 1, signoB: -1, signoC: -1 }, // +--
+        { signoA: -1, signoB: 1, signoC: 1 }, // -++
+    ];
+
+    return combinaciones.map(({ signoA, signoB, signoC }) => ({
+        a: signoA * a,
+        b: signoB * b,
+        c: signoC * c,
+    }));
+}
+
+// Ruta GET
+app.get('/trinomios/:a/:b/:c', (req, resp) => {
     const a = parseFloat(req.params.a);
     const b = parseFloat(req.params.b);
     const c = parseFloat(req.params.c);
 
-    // Validar si es un trinomio cuadrado perfecto
-    if (esTrinomioCP(a, b, c)) {
-        const { binomio, m, n } = converBi(a, b, c);
-        const x = resolverBinomio(m, n);
+    const combinaciones = generarCombinaciones(a, b, c);
+    const resultados = [];
 
-        resp.send({
-            mensaje: `El trinomio ${a}x² + ${b}x + ${c} es un trinomio cuadrado perfecto.`,
-            binomio: binomio,
-            solucion: `x = ${x}`
-        });
-    } else {
-        resp.send({
-            mensaje: `El trinomio ${a}x² + ${b}x + ${c} NO es un trinomio cuadrado perfecto.`
-        });
-    }
+    combinaciones.forEach(({ a, b, c }) => {
+        const trinomio = formatearTrinomio(a, b, c);
+
+        if (esTrinomioCP(a, b, c)) {
+            const { binomio, m, n } = converBi(a, b, c);
+            const x = resolverBinomio(m, n);
+
+            resultados.push({
+                trinomio: trinomio,
+                mensaje: `Es un trinomio cuadrado perfecto.`,
+                binomio: binomio,
+                solucion: `x = ${x}`
+            });
+        } else {
+            resultados.push({
+                trinomio: trinomio,
+                mensaje: `NO es un trinomio cuadrado perfecto.`
+            });
+        }
+    });
+
+    resp.json(resultados);
 });
+
 
 app.listen(3000, () => {
     console.log('Servidor corriendo en el puerto 3000');  // Notificación del inicio del server
