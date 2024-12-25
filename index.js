@@ -148,6 +148,93 @@ app.get('/trinomios/:a/:b/:c', (req, resp) => {
     resp.json(resultados);
 });
 
+//Captura de datos por querrys
+// http://localhost:3000/adicion?num1=15&num2=-7
+app.get('/adicion', (req, resp) => {
+    let n1 = parseFloat(req.query.num1);
+    let n2 = parseFloat(req.query.num2); 
+    let suma = n1 + n2;
+
+    resp.json({ resultado: suma }); // Enviar la respuesta en formato JSON
+});
+//RESTA por query
+// http://localhost:3000/resta?num1=15&num2=7
+app.get('/resta', (req, resp) => {
+    var para = req.query;
+    let n1 = parseFloat(para.num1);
+    let n2 = parseFloat(para.num2);
+    let resta;
+    if(n1>=n2) {
+        resta = n1 - n2;
+    }else{
+        resta = n2 - n1;
+    }
+    resp.send('La resta es: '+ resta);
+});
+//Caclcular un servicio web mediante querys que nos permita conocer el valor a pagar en matriculación vehicular siguiendo las pautas:
+//El año: si es mayor al 2000, pagará un subsidio de contaminacion equivalente al 2% del valor del vehículo. 
+// Si es menor al año 2000 pagara el 5% del valor del vehículo, el valor de matriculacion esta fijado en 96$
+//Si el vehículo posee un aplaca de Imbabura, Carchi, Esmeraldas o Sucumbios Tendra un descuento en el valor de matriculacion del 2.5%.
+//Si el vehículo posee multas por cada multa pagará 18$
+//Desglosar cada parametro en una estructura JSON(Almacenar), que contenga una clave que nos indeque el valor total a pagar.
+// http://localhost:3000/matricula?num1=15&num2=7
+app.get('/matricula', (req, resp) => {
+    var para = req.query;
+    let valVehi = parseFloat(para.valVehi);
+    let anio = parseInt(para.anio);
+    let placa = para.placa.toUpperCase();
+    let multas = parseInt(para.multas);
+    let vehi = parseInt(para.vehi); // Número de vehículos
+    let responseArray = [];
+
+    // Realizar el cálculo para cada vehículo
+    for (let i = 0; i < vehi; i++) {
+        let Total = 0;
+
+        // Calculo del año
+        let calAnio = 0;
+        if (anio >= 2000) {
+            calAnio = valVehi * 0.02; // 2%
+        } else if (anio < 2000) {
+            calAnio = valVehi * 0.05; // 5%
+        }
+
+        // Calculo de la provincia
+        let calPlaca = 0;
+        if (
+            placa[0].toUpperCase() === 'I' ||
+            placa[0].toUpperCase() === 'C' ||
+            placa[0].toUpperCase() === 'E' ||
+            placa[0].toUpperCase() === 'S'
+        ) {
+            calPlaca = 96 * 0.025; // Descuento
+        }
+
+        // Multas
+        let calMultas = multas * 18; // Multa por cada multa $18
+
+        // Total a pagar
+        Total = 96 + calAnio - calPlaca + calMultas;
+
+        // Añadir
+        responseArray.push({
+            valVehi: valVehi,
+            anio: anio,
+            placa: placa,
+            multas: multas,
+            valorBase: 96,
+            subsidioContaminacion: calAnio,
+            descuentoProvincia: calPlaca,
+            multas: calMultas,
+            totalPagar: Total
+        });
+    }
+
+    // Devolver el array de JSON
+    resp.json(responseArray);
+});
+
+
 
 app.listen(3000, () => {
     console.log('Servidor corriendo en el puerto 3000');  // Notificación del inicio del server
